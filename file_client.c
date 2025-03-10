@@ -18,14 +18,14 @@ void receive_file(int server_socket, FILE *fp) {
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 2) {
-        fprintf(stderr, "Usage: %s <server_ip>\n", argv[0]);
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <server_ip> <filename>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
     int server_socket;
     struct sockaddr_in server_address;
-    char filename[100];
+    char *filename = argv[2];
     FILE *file;
 
     // Create socket
@@ -34,9 +34,11 @@ int main(int argc, char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+    // Configure server address
     server_address.sin_family = AF_INET;
     server_address.sin_port = htons(PORT);
 
+    // Convert server IP from text to binary form
     if (inet_pton(AF_INET, argv[1], &server_address.sin_addr) <= 0) {
         perror("Invalid address / Address not supported");
         exit(EXIT_FAILURE);
@@ -47,10 +49,6 @@ int main(int argc, char *argv[]) {
         perror("Connection failed");
         exit(EXIT_FAILURE);
     }
-
-    // Get filename from user
-    printf("Enter filename: ");
-    scanf("%s", filename);
 
     // Send filename to server
     send(server_socket, filename, strlen(filename), 0);
@@ -68,5 +66,7 @@ int main(int argc, char *argv[]) {
     fclose(file);
     close(server_socket);
 
+    printf("File received successfully: %s\n", filename);
     return 0;
 }
+
